@@ -1,53 +1,62 @@
 using UnityEngine;
-
 public class Capsula : MonoBehaviour
 {
-    // Start iscalled once before the first execution of Update after the MonoBehaviour is created
-
-    public int counter = 0;
-    public float speed = 1f;
-
-
-    public CharacterController charaController;
-
-    void Start()
+    [Header("Movement")]
+    [SerializeField] private float moveForce = 10f;
+    [SerializeField] private float jumpForce = 6f;
+    private Rigidbody rigidbodyComponent;
+    private Vector3 moveDirection;
+    private bool isGrounded;
+    private bool jumpRequested;
+    private void Awake()
     {
-
-        charaController = GetComponent<CharacterController>();
+        rigidbodyComponent = GetComponent<Rigidbody>();
     }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-
-
-        if (Input.GetKey(KeyCode.W))
+        float horizontal = 0f;
+        float vertical = 0f;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            horizontal -= 1f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            horizontal += 1f;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            vertical -= 1f;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            vertical += 1f;
+        moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            transform.Translate(new Vector3(0, 0, 1) * speed * Time.deltaTime);
-            //charaController.Move(new Vector3(0, 0, 1) * speed * Time.deltaTime);
+            jumpRequested = true;
         }
-
-        if (Input.GetKey(KeyCode.S))
+    }
+    private void FixedUpdate()
+    {
+        rigidbodyComponent.AddForce(moveDirection * moveForce);
+        if (jumpRequested)
         {
-            transform.Translate(new Vector3(0, 0, -1) * speed * Time.deltaTime);
-            //charaController.Move(new Vector3(0, 0, -1) * speed * Time.deltaTime);
+            rigidbodyComponent.AddForce(
+            Vector3.up * jumpForce,
+            ForceMode.Impulse
+            );
+            jumpRequested = false;
+            isGrounded = false;
         }
-
-        if (Input.GetKey(KeyCode.A))
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            transform.Translate(new Vector3(-1, 0, 0) * speed * Time.deltaTime);
-            //charaController.Move(new Vector3(-1, 0, 0) * speed * Time.deltaTime);
+            isGrounded = true;
         }
-
-        if (Input.GetKey(KeyCode.D))
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            transform.Translate(new Vector3(1, 0, 0) * speed * Time.deltaTime);
-            //charaController.Move(new Vector3(1, 0, 0) * speed * Time.deltaTime);
+            isGrounded = false;
         }
-
-
     }
 }
-        
 
 
