@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.UIElements;
 public class Capsula : MonoBehaviour
 {
     [Header("Movement")]
@@ -8,9 +11,17 @@ public class Capsula : MonoBehaviour
     private Vector3 moveDirection;
     private bool isGrounded;
     private bool jumpRequested;
-    private void Awake()
+    public int itemsCollected = 0;
+    public int totalItems = 0;
+
+    public TextMeshProUGUI TextItemsCollected;
+    public GameObject winPanel;
+    private void Start()
     {
+        winPanel.SetActive(false);
         rigidbodyComponent = GetComponent<Rigidbody>();
+        totalItems = GameObject.FindGameObjectsWithTag("Item").Length;
+        TextItemsCollected.text = "Items Collected: " + itemsCollected + "/" + totalItems;
     }
     private void Update()
     {
@@ -49,6 +60,21 @@ public class Capsula : MonoBehaviour
         {
             isGrounded = true;
         }
+        if (collision.gameObject.CompareTag("Item"))
+        {
+            Destroy (collision.gameObject);
+            itemsCollected++;
+            TextItemsCollected.text = "Items Collected: " + itemsCollected +"/" + totalItems;
+            if (itemsCollected >= totalItems) 
+            {
+                Debug.Log("All items collected.");
+                winPanel.SetActive(true);
+            }
+
+        }
+
+
+
     }
     private void OnCollisionExit(Collision collision)
     {
@@ -57,6 +83,10 @@ public class Capsula : MonoBehaviour
             isGrounded = false;
         }
     }
+
+
+
+
 }
 
 
